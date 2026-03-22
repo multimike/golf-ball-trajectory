@@ -1,0 +1,24 @@
+.sidebar {
+    width: 320px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    color: #1a4d2e;
+}
+
+.sidebar p {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+small {
+    color: #888;
+    font-weight: normal;
+}

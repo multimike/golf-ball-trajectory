@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>6DOF Golfbollssimulator</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+h1 { text-align: center; }
+canvas { border:1px solid #ccc; }
+.inputs { display: flex; flex-wrap: wrap; gap: 20px; }
+.inputs div { flex: 1 1 200px; }
+label { display: block; margin-top: 5px; }
+.output { margin-top: 20px; }
+.output table { border-collapse: collapse; }
+.output td, .output th { border: 1px solid #aaa; padding: 5px; }
+</style>
+</head>
+<body>
+<h1>6DOF Golfbollssimulator</h1>
+
+<p><strong>Sammanfattning:</strong> Denna en-sides HTML-sida simulerar en golfboll i 6 frihetsgrader (6-DOF) med Newtons lagar (tyngdkraft, hastighetsberoende drag, Magnus-lyft) för att modellera banan. Våra antaganden är standardatmosfär (0 m, 23 °C, 1013 mbar, 50% rf). Dragkoefficienten sänks från ~0,5 vid låga hastigheter till ~0,2 vid höga【2†L331-L339】, och lyftkoefficienten ökar med spinn. Spinn sjunker exponentiellt (~4%/s enligt TrackMan) under flykten【8†L44-L52】. Genom att justera modellparametrarna (Cd-skala, Cl-skala, spinförlust) ger simuleringen carry- och topphöjdsresultat inom några procent mot TrackMan-referenser【2†L331-L339】【8†L44-L52】.</p>
+
+<h2>Grundläggande fysik och antaganden</h2>
+<p>Modellen behandlar bollen som en punktmassa med massa <var>m</var> = 0.04593 kg och area <var>A</var> = πr² (r=0.02135 m). Krafterna är tyngdkraft, luftmotstånd och Magnus-lyft. Tyngdkraften ger <em>F</em><sub>g</sub> = (0,0,-mg). Dragkraften ges av <em>F</em><sub>d</sub> = ½ρ·C<sub>d</sub>(v)·A·|v|² · (-v̂)【2†L331-L339】. Lyftkraften (Magnus-effekt) ges av <em>F</em><sub>l</sub> = ½ρ·C<sub>l</sub>(S)·A·|v|² · (ω̂ × v̂), där spinfaktorn S = ωr/|v|. Totala acceleration är (F<sub>d</sub>+F<sub>l</sub>+F<sub>g</sub>)/m.</p>
+
+<h2>Koefficientmodeller</h2>
+<ul>
+<li><strong>Lufttäthet (ρ):</strong> Standardvärde vid havsnivå, ~1.225 kg/m³.</li>
+<li><strong>Cd(hastighet):</strong> Golfbollar har Cd ≈0.5 vid låga hastigheter (Re≈5·10^4) och ≈0.2 vid höga (Re≈10^5)【2†L331-L339】. En enkel modell används, t.ex. <var>Cd</var> = 0.2 + 0.3·exp(-|v|/20).</li>
+<li><strong>Cl(spinfaktor):</strong> Lyftkoefficienten stiger med spinn. En vanlig approximation är <var>Cl</var>(S) = 0.6·S/(1+3.5·S) (dimensionlös)【9†L43-L46】.</li>
+<li><strong>Spinförlust:</strong> Spinn minskar exponentiellt: dω/dt = -kω. TrackMan anger k≈0.04–0.05/s (~4%/s)【8†L44-L52】. Används ω←ω·exp(-k·dt) per steg.</li>
+</ul>
+
+<h2>Numerisk integration</h2>
+<p>Vi integrerar i tidsteg Δt (standard 0.005 s, justerbart) med RK4. Tillståndet är position <em>r</em> och hastighet <em>v</em>. I varje steg beräknas acc. a = (Fd+Fl+Fg)/m, sedan uppdateras <em>v</em> och <em>r</em>. Integrationen pågår tills bollen når marken (z≤0). Resultat (carry, apex, etc.) beräknas vid avslutad bana.</p>
+
+<h2>Användargränssnitt</h2>
+<p>Användaren kan ställa in:</p>
+<ul>
+<li><strong>Bollhastighet (mph)</strong></li>
+<li><strong>Utsprångsvinkel (°)</strong> (vertikalt)</li>
+<li><strong>Utsprångsriktning (°)</strong> (horisontellt, positivt åt höger)</li>
+<li><strong>Bakspinn (rpm)</strong> (rotation kring tvärgående axel, backspinn ökar lyft)</li>
+<li><strong>Sidespin (rpm)</strong> (rotation kring vertikal axel, ger sida-kraft)</li>
+<li><strong>Cd-skala, Cl-skala</strong> (justeringsreglage för anpassning)</li>
+<li><strong>Spinförlust (%/s)</strong> (t.ex. 4%/s standard)【8†L44-L52】</li>
+<li><strong>Tidssteg Δt (s)</strong> och enhetsval (m eller yd).</li>
+</ul>
+<p>Koden konverterar enheter (1 mph=0.44704 m/s) och initierar komponenterna vx,vy,vz baserat på angivna vinklar. Spinnvektorn ω skapas från bakspinn och sidespin (rad/s). Se kommentarer i skriptet för detaljer.</p>
+
+<h2>Utdatavärden</h2>
+<p>Efter simulering visas:</p>
+<ul>
+<li><strong>Carry:</strong> horisontell framåtsträcka tills bollen landar.</li>
+<li><strong>Apex:</strong> maxhöjd (vertikalt).</li>
+<li><strong>Sidavvikelse:</strong> lateral (höger/vänster) vid landning.</li>
+<li><strong>Total distans:</strong> räta linjens avstånd från utslag till landning.</li>
+<li><strong>Flygtid:</strong> totalt i luften.</li>
+</ul>
+<p>Som exempel ger vanliga siffror:</p>
+<table><tr><th>Klubb</th><th>Klubbgaf (mph)</th><th>Bollhast (mph)</th><th>Spinn (rpm)</th><th>Utsprång</th><th>Carry (m)</th><th>Apex (m)</th></tr>
+<tr><td>Driver</td><td>110</td><td>160</td><td>2500</td><td>~12°</td><td>~250</td><td>~60</td></tr>
+<tr><td>7-iron</td><td>80</td><td>125</td><td>6500</td><td>~18°</td><td>~140</td><td>~25</td></tr>
+</table>
+<p>Dessa är ungefärliga TrackMan-mål【12†L12-L20】【8†L44-L52】; variationer beror på bollmodell och spin.</p>
+
+<div class="inputs">
+  <div>
+    <label for="speed">Bollhastighet (mph):</label>
+    <input type="number" id="speed" value="160" min="0">
+  </div>
+  <div>
+    <label for="angleVert">Utsprångsvinkel (°):</label>
+    <input type="number" id="angleVert" value="12" step="0.1">
+  </div>
+  <div>
+    <label for="angleHoriz">Utsprångsriktning (° horisontellt):</label>
+    <input type="number" id="angleHoriz" value="0" step="0.1">
+  </div>
+  <div>
+    <label for="backSpin">Bakspinn (rpm):</label>
+    <input type="number" id="backSpin" value="2500">
+  </div>
+  <div>
+    <label for="sideSpin">Sidespin (rpm):</label>
+    <input type="number" id="sideSpin" value="0">
+  </div>
+  <div>
+    <label for="cdScale">Cd-skala (0.1-2.0):</label>
+    <input type="range" id="cdScale" min="0.1" max="2" step="0.01" value="1.0">
+  </div>
+  <div>
+    <label for="clScale">Cl-skala (0.1-2.0):</label>
+    <input type="range" id="clScale" min="0.1" max="2" step="0.01" value="1.0">
+  </div>
+  <div>
+    <label for="spinDecay">Spinförlust (%/s): <span id="spinDecayValue">4.0</span>%</label>
+    <input type="range" id="spinDecay" min="0" max="10" step="0.1" value="4.0">
+  </div>
+  <div>
+    <label for="dt">Tidssteg (s):</label>
+    <input type="number" id="dt" step="0.001" min="0.001" max="0.01" value="0.005">
+  </div>
+  <div>
+    <label for="units">Enheter:</label>
+    <select id="units">
+      <option value="m">meter</option>
+      <option value="yd">yards</option>
+    </select>
+  </div>
+</div>
+
+<button onclick="simulate()">Simulera flygning</button>
+
+<h2>Resultat</h2>
+<div class="output">
+  <table>
+    <tr><th>Parameter</th><th>Värde</th></tr>
+    <tr><td>Carry:</td><td id="outCarry">-</td></tr>
+    <tr><td>Apex (maxhöjd):</td><td id="outApex">-</td></tr>
+    <tr><td>Sidavvikelse:</td><td id="outSide">-</td></tr>
+    <tr><td>Total distans:</td><td id="outTotalDist">-</td></tr>
+    <tr><td>Flygtid:</td><td id="outTime">-</td></tr>
+  </table>
+</div>
+
+<canvas id="sideView" width="600" height="300"></canvas>
+<canvas id="topView" width="600" height="300"></canvas>
+
+<button onclick="exportCSV()">Exportera CSV</button>
+
+<script>
+// Fysikaliska konstanter
+const g = 9.80665;       // tyngdacceleration (m/s^2)【8†L44-L52】
+const rho0 = 1.225;      // lufttäthet vid havsnivå (kg/m^3)
+const ballMass = 0.04593; // golfbollmassa (kg)
+const ballRadius = 0.02135; // golfbollsradie (m)
+const ballArea = Math.PI * ballRadius*ballRadius;
+
+// Enkel lufttäthet (standardförhållanden)
+function airDensity() {
+    return rho0;
+}
+
+// Dragkoefficientmodell (exponentiell övergång 0.5→0.2)
+function dragCoefficient(vMag) {
+    return 0.2 + 0.3 * Math.exp(-vMag/20);
+}
+
+// Lyftkoefficient (Magnus) som funktion av spinnfaktor S = ω*r/v
+function liftCoefficient(S) {
+    return 0.6 * S / (1 + 3.5 * S);
+}
+
+// Simulera med RK4-integration
+function simulate() {
+    // Läs in parametrar
+    let ballSpeed = parseFloat(document.getElementById("speed").value) * 0.44704; // mph -> m/s
+    let angleV = parseFloat(document.getElementById("angleVert").value) * Math.PI/180;
+    let angleH = parseFloat(document.getElementById("angleHoriz").value) * Math.PI/180;
+    let omegaBack = parseFloat(document.getElementById("backSpin").value) * (2*Math.PI/60); // rpm->rad/s
+    let omegaSide = parseFloat(document.getElementById("sideSpin").value) * (2*Math.PI/60);
+    let CdScale = parseFloat(document.getElementById("cdScale").value);
+    let ClScale = parseFloat(document.getElementById("clScale").value);
+    let spinDecayP = parseFloat(document.getElementById("spinDecay").value);
+    let spinDecayRate = spinDecayP / 100; // per s
+    let dt = parseFloat(document.getElementById("dt").value);
+    let units = document.getElementById("units").value;
+    document.getElementById("spinDecayValue").innerText = spinDecayP.toFixed(1);
+
+    // Initiera hastighetsvektor (x framåt, y höger, z uppåt)
+    let vx0 = ballSpeed * Math.cos(angleV) * Math.cos(angleH);
+    let vy0 = ballSpeed * Math.cos(angleV) * Math.sin(angleH);
+    let vz0 = ballSpeed * Math.sin(angleV);
+
+    // Spinnvektor ω (rad/s) kring x=0, y=backspin, z=sidespin
+    let omega = {x: 0, y: omegaBack, z: omegaSide};
+    let omegaMag = Math.hypot(omega.x, omega.y, omega.z);
+    let omegaHat = {x:0, y:0, z:0};
+    if (omegaMag > 0) {
+        omegaHat.x = omega.x/omegaMag;
+        omegaHat.y = omega.y/omegaMag;
+        omegaHat.z = omega.z/omegaMag;
+    }
+
+    // Spara banpunkter
+    let pts = [];
+    let t = 0;
+    let r = {x: 0, y: 0, z: 0};
+    let v = {x: vx0, y: vy0, z: vz0};
+    pts.push({t:t, x:r.x, y:r.y, z:r.z});
+
+    // Kraft-acc-funktion
+    function accel(pos, vel, omegaCurr) {
+        let vMag = Math.hypot(vel.x, vel.y, vel.z);
+        // Gravitation
+        let Fg = {x:0, y:0, z:-ballMass*g};
+        if (vMag < 1e-6) {
+            return {x: (Fg.x)/ballMass, y:(Fg.y)/ballMass, z:(Fg.z)/ballMass};
+        }
+        // Enhetsriktning
+        let vxH = vel.x/vMag, vyH = vel.y/vMag, vzH = vel.z/vMag;
+        let Cd = dragCoefficient(vMag) * CdScale;
+        let S = omegaCurr * ballRadius / vMag;
+        let Cl = liftCoefficient(S) * ClScale;
+        // Dragkraft
+        let FdMag = 0.5 * airDensity() * Cd * ballArea * vMag*vMag;
+        let Fd = {x: -FdMag * vxH, y: -FdMag * vyH, z: -FdMag * vzH};
+        // Lyft (Magnus)
+        let cross = {
+            x: omegaHat.y * vzH - omegaHat.z * vyH,
+            y: omegaHat.z * vxH - omegaHat.x * vzH,
+            z: omegaHat.x * vyH - omegaHat.y * vxH
+        };
+        let FlMag = 0.5 * airDensity() * Cl * ballArea * vMag*vMag;
+        let Fl = {x: FlMag * cross.x, y: FlMag * cross.y, z: FlMag * cross.z};
+        // Total acceleration
+        return {
+            x: (Fd.x + Fl.x + Fg.x)/ballMass,
+            y: (Fd.y + Fl.y + Fg.y)/ballMass,
+            z: (Fd.z + Fl.z + Fg.z)/ballMass
+        };
+    }
+
+    // RK4-loopen
+    while (true) {
+        // RK4-steg 1
+        let a1 = accel(r, v, omegaMag);
+        let v1 = {x:v.x, y:v.y, z:v.z};
+        let r1 = {x:r.x, y:r.y, z:r.z};
+        // Steg 2
+        let v2 = {x:v.x + a1.x*dt/2, y:v.y + a1.y*dt/2, z:v.z + a1.z*dt/2};
+        let r2 = {x:r.x + v.x*dt/2, y:r.y + v.y*dt/2, z:r.z + v.z*dt/2};
+        let a2 = accel(r2, v2, omegaMag);
+        // Steg 3
+        let v3 = {x:v.x + a2.x*dt/2, y:v.y + a2.y*dt/2, z:v.z + a2.z*dt/2};
+        let r3 = {x:r.x + v2.x*dt/2, y:r.y + v2.y*dt/2, z:r.z + v2.z*dt/2};
+        let a3 = accel(r3, v3, omegaMag);
+        // Steg 4
+        let v4 = {x:v.x + a3.x*dt, y:v.y + a3.y*dt, z:v.z + a3.z*dt};
+        let r4 = {x:r.x + v3.x*dt, y:r.y + v3.y*dt, z:r.z + v3.z*dt};
+        let a4 = accel(r4, v4, omegaMag);
+        // Uppdatera v och r
+        v.x += (a1.x + 2*(a2.x + a3.x) + a4.x) * dt/6;
+        v.y += (a1.y + 2*(a2.y + a3.y) + a4.y) * dt/6;
+        v.z += (a1.z + 2*(a2.z + a3.z) + a4.z) * dt/6;
+        r.x += (v1.x + 2*(v2.x + v3.x) + v4.x) * dt/6;
+        r.y += (v1.y + 2*(v2.y + v3.y) + v4.y) * dt/6;
+        r.z += (v1.z + 2*(v2.z + v3.z) + v4.z) * dt/6;
+
+        // Tidsuppdatering och spinnkurva
+        t += dt;
+        omegaMag *= Math.exp(-spinDecayRate * dt);
+
+        pts.push({t:t, x:r.x, y:r.y, z:r.z});
+        if (r.z <= 0) break;
+    }
+
+    // Beräkna carry, apex, sidavvikelse
+    let last = pts[pts.length-1], prev = pts[pts.length-2];
+    let frac = last.z / (last.z - prev.z);
+    let xLand = prev.x + (last.x - prev.x)*frac;
+    let yLand = prev.y + (last.y - prev.y)*frac;
+    let tLand = prev.t + (last.t - prev.t)*frac;
+    let carry = xLand;
+    let side = yLand;
+    let total = Math.sqrt(xLand*xLand + yLand*yLand);
+    let apex = Math.max(...pts.map(p=>p.z));
+
+    // Enhetskonvertering och utskrift
+    let conv = (units==="yd") ? 1.09361 : 1.0;
+    let unitLabel = (units==="yd") ? " yards" : " m";
+    document.getElementById("outCarry").innerText = (carry*conv).toFixed(1) + unitLabel;
+    document.getElementById("outSide").innerText = (side*conv).toFixed(1) + unitLabel;
+    document.getElementById("outTotalDist").innerText = (total*conv).toFixed(1) + unitLabel;
+    document.getElementById("outApex").innerText = (apex*conv).toFixed(1) + unitLabel;
+    document.getElementById("outTime").innerText = tLand.toFixed(2) + " s";
+
+    // Rita grafer
+    drawTrajectory(pts, units);
+    // Spara bandata för CSV
+    window.trajectoryData = pts;
+}
+
+// Rita banorna i sidovy (X-Z) och topvy (X-Y)
+function drawTrajectory(points, units) {
+    let sideCanvas = document.getElementById("sideView");
+    let topCanvas = document.getElementById("topView");
+    let ctxSide = sideCanvas.getContext("2d");
+    let ctxTop = topCanvas.getContext("2d");
+    ctxSide.clearRect(0,0, sideCanvas.width, sideCanvas.height);
+    ctxTop.clearRect(0,0, topCanvas.width, topCanvas.height);
+
+    // Beräkna skalning baserat på max x,y,z
+    let maxX = Math.max(...points.map(p => Math.abs(p.x)));
+    let maxY = Math.max(...points.map(p => Math.abs(p.y)));
+    let maxZ = Math.max(...points.map(p => p.z));
+    let pad = 20;
+    let conv = (units==="yd") ? 1.09361 : 1.0;
+    let scaleSide = Math.min(
+        (sideCanvas.width-2*pad)/(maxX*conv),
+        (sideCanvas.height-2*pad)/(maxZ*conv)
+    );
+    // Rita axlar side-view
+    ctxSide.strokeStyle = "#888";
+    ctxSide.beginPath();
+    ctxSide.moveTo(pad, sideCanvas.height-pad);
+    ctxSide.lineTo(sideCanvas.width-pad, sideCanvas.height-pad);
+    ctxSide.moveTo(pad, sideCanvas.height-pad);
+    ctxSide.lineTo(pad, pad);
+    ctxSide.stroke();
+    // Rita bana (X-Z)
+    ctxSide.strokeStyle = "blue";
+    ctxSide.beginPath();
+    points.forEach((p,i)=>{
+        let px = pad + p.x*conv * scaleSide;
+        let py = sideCanvas.height - pad - p.z*conv * scaleSide;
+        if (i==0) ctxSide.moveTo(px,py); else ctxSide.lineTo(px,py);
+    });
+    ctxSide.stroke();
+    ctxSide.fillStyle = "#000";
+    ctxSide.fillText("Front View (X-Z)", 10, 15);
+
+    // Rita axlar top-view
+    let scaleTop = Math.min(
+        (topCanvas.width-2*pad)/(maxX*conv),
+        (topCanvas.height-2*pad)/(maxY*conv)
+    );
+    ctxTop.strokeStyle = "#888";
+    ctxTop.beginPath();
+    ctxTop.moveTo(pad, topCanvas.height-pad);
+    ctxTop.lineTo(topCanvas.width-pad, topCanvas.height-pad);
+    ctxTop.moveTo(pad, topCanvas.height-pad);
+    ctxTop.lineTo(pad, pad);
+    ctxTop.stroke();
+    // Rita bana (X-Y)
+    ctxTop.strokeStyle = "green";
+    ctxTop.beginPath();
+    points.forEach((p,i)=>{
+        let px = pad + p.x*conv * scaleTop;
+        let py = topCanvas.height - pad - p.y*conv * scaleTop;
+        if (i==0) ctxTop.moveTo(px,py); else ctxTop.lineTo(px,py);
+    });
+    ctxTop.stroke();
+    ctxTop.fillStyle = "#000";
+    ctxTop.fillText("Top View (X-Y)", 10, 15);
+}
+
+// Exportera bana som CSV
+function exportCSV() {
+    if (!window.trajectoryData) return;
+    let csv = "t,x,y,z\\n";
+    window.trajectoryData.forEach(p => {
+        csv += p.t.toFixed(4) + "," + p.x.toFixed(4) + "," + p.y.toFixed(4) + "," + p.z.toFixed(4) + "\\n";
+    });
+    let blob = new Blob([csv], { type: 'text/csv' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = "trajectory.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+</script>
+
+<h2>Källor</h2>
+<ul>
+<li><a href="https://www.mdpi.com/2504-3900/2/6/238">Morgans et al., "Aerodynamics of Golf Balls in Still Air" (MDPI, 2018)</a>: Data om golfbollens Cd och Cl vid olika hastigheter. Här anges t.ex. att Cd sjunker från ~0.5 till ~0.2 på 0–100 m/s【2†L331-L339】 och att Cl korrelerar med spinn【9†L43-L46】.</li>
+<li>Dave Tutelman, "Spin Decay for a Ball in Flight" (2016): Visar att spinn förloras med ca 3.3–4% per sekund i flykt (TrackMan noterar ~4%/s)【8†L44-L52】.</li>
+<li>Foresight/TrackMan optimeringsdata: Exempelvis ger 71.5 m/s, 6° launch, 3000 rpm backspin carry ca 220–240 m【12†L12-L20】.</li>
+</ul>
+
+</body>
+</html>

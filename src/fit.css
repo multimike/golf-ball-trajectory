@@ -1,0 +1,127 @@
+:root {
+	--fit-bg: #f6f7f9;
+	--fit-card: #ffffff;
+	--fit-text: #14213d;
+	--fit-accent: #124e78;
+	--fit-error: #b00020;
+	--fit-border: #d8dee6;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: radial-gradient(circle at 20% 0%, #e8f0f7 0%, var(--fit-bg) 45%);
+	color: var(--fit-text);
+	font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.fit-page {
+	max-width: 1000px;
+	margin: 0 auto;
+	padding: 24px;
+}
+
+.fit-header {
+	margin-bottom: 16px;
+}
+
+.fit-header h1 {
+	margin: 0 0 8px;
+}
+
+.fit-header p {
+	margin: 0 0 12px;
+}
+
+.fit-options {
+	margin: 0 0 12px;
+}
+
+.fit-options p {
+	margin: 0 0 8px;
+	font-weight: 600;
+}
+
+.fit-checkbox-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(240px, 1fr));
+	gap: 8px 14px;
+}
+
+.fit-checkbox-grid label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.95rem;
+}
+
+.fit-button {
+	border: none;
+	border-radius: 8px;
+	padding: 10px 14px;
+	background: var(--fit-accent);
+	color: white;
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.fit-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.fit-error {
+	color: var(--fit-error);
+	margin: 10px 0;
+}
+
+.fit-card {
+	margin-top: 16px;
+	background: var(--fit-card);
+	border: 1px solid var(--fit-border);
+	border-radius: 12px;
+	padding: 16px;
+}
+
+.fit-card h2 {
+	margin-top: 0;
+}
+
+.fit-chart-wrap {
+	height: 320px;
+}
+
+.fit-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.fit-grid h3 {
+	margin: 0 0 8px;
+}
+
+pre {
+	margin: 0;
+	padding: 12px;
+	border-radius: 8px;
+	background: #f4f6fa;
+	overflow: auto;
+}
+
+@media (max-width: 800px) {
+	.fit-page {
+		padding: 14px;
+	}
+
+	.fit-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.fit-checkbox-grid {
+		grid-template-columns: 1fr;
+	}
+}
