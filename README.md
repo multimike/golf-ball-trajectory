@@ -1,5 +1,7 @@
 # Golf Ball Trajectory
 
+Test it here: https://multimike.github.io/golf-ball-trajectory/
+
 A physics-model-based golf ball trajectory simulator built with React, Three.js, and TypeScript.
 This project simulates golf ball flight using aerodynamic coefficients and atmospheric conditions.
 
