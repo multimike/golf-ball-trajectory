@@ -19,7 +19,7 @@ It simulates the ball flight using fourth-order Runge-Kutta method (**RK4**) for
 
 The model has been fitted primarily for **carry distance**, but also for **shot height**, **flight time** and **landing angle**.
 
-Training data is located in `/training-data` and was generated using the Flightscope trajectory optimizer.
+Training data is located in `/training-data` and was produced using the Flightscope trajectory optimizer: https://trajectory.flightscope.com/
 
 The training process can be carried out in a separate HTMl page: `http://localhost:5173/fit.html`
 
