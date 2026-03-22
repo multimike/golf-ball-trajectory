@@ -215,6 +215,7 @@ export default function MainContent({ trajectory, unitLabel, unitMultiplier }: M
 		// 	y: ballState.position.y * unitMultiplier,
 		// }))
 
+		const shotHeight = Math.max(...chartData.map((point) => point.y))
 		const chart = new Chart(canvas, {
 			type: 'scatter',
 			data: {
@@ -255,7 +256,7 @@ export default function MainContent({ trajectory, unitLabel, unitMultiplier }: M
 							font: { weight: 'bold' },
 						},
 						min: 0,
-						max: Math.max(80, Math.ceil(Math.max(...chartData.map((point) => point.y)) + 10)),
+						max: Math.ceil((shotHeight + 2) / 5) * 5,
 					},
 				},
 			},
@@ -274,7 +275,7 @@ export default function MainContent({ trajectory, unitLabel, unitMultiplier }: M
 					<div>Max Height: <span>{stats.maxHeight.toFixed(1)}</span> <span className="unit-label">{unitLabel}</span></div>
 					<div>Offline: <span>{stats.offline.toFixed(1)}</span> <span className="unit-label">{unitLabel}</span></div>
 					<div>Flight time: <span>{stats.flightTime.toFixed(1)}</span> <span className="unit-label">s</span></div>
-					<div>Landing angle: <span>{stats.landingAngle.toFixed(1)}</span> <span className="unit-label">deg</span></div>
+					<div>Landing angle: <span>{stats.landingAngle.toFixed(1)}</span><span className="unit-label">°</span></div>
 				</div>
 				<div className="chart-container">
 					<canvas ref={chartCanvasRef} />
@@ -286,7 +287,7 @@ export default function MainContent({ trajectory, unitLabel, unitMultiplier }: M
 				<div id="canvas-container">
 					<Canvas
 						shadows
-						camera={{ fov: 55, near: 0.1, far: 1000, position: [0, 6, 15] }}
+						camera={{ fov: 55, near: 0.1, far: 1000, position: [25, 30, 35] }}
 						gl={{ antialias: true }}
 					>
 						<DrivingRangeScene trajectory={trajectory} unitMultiplier={unitMultiplier} />
