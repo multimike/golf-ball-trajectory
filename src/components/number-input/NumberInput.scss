@@ -1,0 +1,56 @@
+@use "sass:color";
+@use "../../styles/variables" as vars;
+
+.number-input-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+
+    .input-label {
+        font-size: 0.75rem;
+        color: vars.$color-text-muted;
+        margin-bottom: 4px;
+        font-weight: 700;
+        //text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        span {
+            color: vars.$color-error;
+            text-transform: none;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+    }
+
+    .number-input-field {
+        padding: 8px 12px;
+        border: 1px solid vars.$color-border;
+        border-radius: vars.$radius-main;
+        font-size: 1rem;
+        background: #ffffff;
+        color: #212529;
+        transition: all 0.15s ease-in-out;
+
+        &:focus {
+            outline: none;
+            border-color: vars.$color-primary;
+            box-shadow: 0 0 0 0.2rem vars.$glow-primary;
+        }
+
+        &::placeholder {
+            color: color.adjust(vars.$color-text-muted, $lightness: 15%);
+        }
+    }
+
+    // Invalid State
+    &.has-error {
+        .number-input-field {
+            border-color: vars.$color-error;
+            background-color: vars.$color-error-bg;
+
+            &:focus {
+                box-shadow: 0 0 0 0.2rem vars.$glow-error;
+            }
+        }
+    }
+}

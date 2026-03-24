@@ -1,16 +1,106 @@
-button {
-    width: 100%;
-    padding: 12px;
-    background: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1em;
-    font-weight: bold;
+@use "sass:color";
+@use "../../styles/variables" as vars;
+
+.btn {
+    // Base Styles
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: vars.$radius-main;
+    border: 1px solid transparent;
     cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.2s;
-}
-button:hover {
-    background: #218838;
+    transition: all 0.15s ease-in-out;
+    user-select: none;
+    text-decoration: none; // Removes the default link underline
+    color: inherit;       // Ensures text color follows the variant logic
+    line-height: 1;        // Prevents links from being taller than buttons
+
+    // Ensure vertical alignment matches inputs
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px; // Automatically puts 8px between any elements inside (icon, text, etc.)
+
+    &-sm {
+        gap: 4px; // Smaller gap for smaller buttons
+    }
+
+    // State: Disabled
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    // State: Focus (Global Glow)
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem vars.$glow-primary;
+    }
+
+    // --- Variants ---
+
+    // Primary: Forest Green
+    &-primary {
+        background-color: vars.$color-primary;
+        color: #ffffff;
+
+        &:hover:not(:disabled) {
+            background-color: vars.$color-primary-hover;
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(1px); // Subtle click feel
+        }
+    }
+
+    // Secondary: Sage Green-Grey
+    &-secondary {
+        background-color: vars.$color-secondary;
+        color: #ffffff;
+
+        &:hover:not(:disabled) {
+            background-color: vars.$color-secondary-hover;
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+    }
+
+    // Outline: Transparent with Border
+    &-outline {
+        background-color: transparent;
+        border-color: vars.$color-border;
+        color: vars.$color-primary;
+
+        &:hover:not(:disabled) {
+            background-color: vars.$color-primary-light; // Light tint of green
+            border-color: vars.$color-primary;
+        }
+
+        &:active:not(:disabled) {
+            background-color: color.adjust(vars.$color-primary-light, $lightness: -2%);
+        }
+    }
+
+    // --- Sizes ---
+
+    &-sm {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        letter-spacing: 0.2px;
+    }
+
+    &-md {
+        padding: 8px 18px;
+        font-size: 0.95rem;
+    }
+
+    &-lg {
+        padding: 12px 26px;
+        font-size: 1.1rem;
+    }
 }

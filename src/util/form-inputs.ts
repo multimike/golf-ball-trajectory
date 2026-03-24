@@ -1,4 +1,4 @@
-import {Degrees, Mph, Rpm} from "./types.ts"
+import {Degrees, Mph, Mps, Rpm} from "./types.ts"
 import {BallSpin} from "../simulation/launch-properties.ts"
 
 export type Units = 'yards' | 'meters'
@@ -6,6 +6,11 @@ export type SpinMode = 'total_axis' | 'back_side'
 
 export type FormInputs = {
 	units: Units
+	airTemperature: number
+	airPressure: number
+	relativeHumidity: number
+	windSpeed: Mps
+	windDirection: Degrees
 	speed: Mph
 	launch: Degrees
 	azimuth: Degrees
@@ -18,6 +23,11 @@ export type FormInputs = {
 
 // 252.4 yard carry, 27,7 yard apex (Flightscope)
 export const defaultInputs: FormInputs = {
+	airPressure: 1013,
+	airTemperature: 25,
+	relativeHumidity: 50,
+	windSpeed: 0,
+	windDirection: 0,
 	units: 'yards',
 	speed: 146,
 	launch: 12.1,

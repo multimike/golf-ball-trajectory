@@ -1,0 +1,65 @@
+@use "../../styles/variables" as vars;
+
+.select-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+
+    .input-label {
+        font-size: 0.75rem;
+        color: vars.$color-text-muted;
+        margin-bottom: 4px;
+        font-weight: 700;
+        //text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .select-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .select-field {
+            width: 100%;
+            padding: 8px 32px 8px 12px; // Right padding for the chevron
+            border: 1px solid vars.$color-border;
+            border-radius: vars.$radius-main;
+            font-size: 1rem;
+            background: #ffffff;
+            color: #212529;
+            cursor: pointer;
+            appearance: none; // Hide native browser arrow
+            -webkit-appearance: none;
+            transition: all 0.15s ease-in-out;
+
+            &:focus {
+                outline: none;
+                border-color: vars.$color-primary;
+                box-shadow: 0 0 0 0.2rem vars.$glow-primary;
+            }
+
+            &:disabled {
+                background-color: vars.$color-border-light;
+                cursor: not-allowed;
+                color: vars.$color-text-muted;
+            }
+        }
+
+        .select-chevron {
+            position: absolute;
+            right: 12px;
+            pointer-events: none; // Click goes through to the select
+            font-size: 0.7rem;
+            color: vars.$color-text-muted;
+            transition: color 0.15s ease;
+        }
+
+        &:hover .select-chevron {
+            color: vars.$color-primary;
+        }
+    }
+
+    &.is-disabled {
+        opacity: 0.7;
+    }
+}

@@ -4,6 +4,17 @@ import Sidebar from './components/sidebar/Sidebar'
 import {defaultInputs, FormInputs, getBallSpin} from "./util/form-inputs.ts"
 import {BallState} from "./simulation/trajectory.ts"
 import {simulateTrajectory} from "./simulation/simulation.ts"
+import {Atmosphere} from "./simulation/atmosphere.ts"
+
+function getAtmosphereFromInputs(inputs: FormInputs): Atmosphere {
+    return {
+        windSpeed: inputs.windSpeed,
+        windDirection: inputs.windDirection,
+        airTemperatureC: inputs.airTemperature,
+        airPressure: inputs.airPressure * 100, // Convert from hekto-pascals to pascals
+        relativeHumidity: inputs.relativeHumidity,
+    }
+}
 
 export default function App() {
     const [inputs, setInputs] = useState<FormInputs>(defaultInputs)
@@ -17,7 +28,8 @@ export default function App() {
             },
             ballSpin
         }
-        return simulateTrajectory(launchProperties)
+        const atmosphere = getAtmosphereFromInputs(defaultInputs)
+        return simulateTrajectory(launchProperties, atmosphere)
     })
 
     const unitSettings = useMemo(() => {
@@ -37,7 +49,8 @@ export default function App() {
             },
             ballSpin
         }
-        const nextTrajectory = simulateTrajectory(launchProperties)
+        const atmosphere = getAtmosphereFromInputs(inputs)
+        const nextTrajectory = simulateTrajectory(launchProperties, atmosphere)
         setTrajectory(nextTrajectory)
     }
 

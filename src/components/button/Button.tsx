@@ -1,13 +1,32 @@
-import {ReactNode} from "react"
-import './Button.scss'
+import './Button.scss';
 
 type Props = {
-	children: ReactNode
-    onClick?: () => void
+    children: React.ReactNode;
+    onClick?: () => void;
+    type?: 'button' | 'submit' | 'reset';
+    variant?: 'primary' | 'secondary' | 'outline';
+    size?: 'sm' | 'md' | 'lg';
+    disabled?: boolean;
+    className?: string;
 }
 
-export default function Button(props: Props) {
-	return (
-		<button onClick={props.onClick}>{props.children}</button>
-	)
+export default function Button({
+    children,
+    onClick,
+    type = 'button',
+    variant = 'primary',
+    size = 'md',
+    disabled = false,
+    className = ''
+}: Props) {
+    return (
+        <button
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            className={`btn btn-${variant} btn-${size} ${className}`}
+        >
+            {children}
+        </button>
+    );
 }
