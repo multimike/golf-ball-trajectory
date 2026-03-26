@@ -27,7 +27,7 @@ Three forces affect the ball in flight:
 where:
 - $m = 0.0459 kg$ is the mass of the ball
 - $G = 9.81 m/s^2$ is the gravitational constant
-- $A = \pi r^2 $ is the cross-sectional area of the ball
+- $A = \pi r^2$ is the cross-sectional area of the ball
 - $r = 0.0213m$ is the radius of the ball
 - $v$ is the ball's relative speed through air
 - $\rho$ is the density of air (see below)
