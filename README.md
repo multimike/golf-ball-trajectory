@@ -19,10 +19,10 @@ It simulates the ball flight using fourth-order Runge-Kutta method (**RK4**) for
 
 ### The math
 
-Three forces affect the ball in flight:
+Three forces affect the ball in the simulation:
 - Gravity: $F_g = mG$
 - Drag: $F_d = \frac{1}{2} \rho A C_d v^2$
-- Lift force: $F_l = \frac{1}{2} \rho A C_l v^2$
+- Lift: $F_l = \frac{1}{2} \rho A C_l v^2$
 
 where:
 - $m = 0.0459 kg$ is the mass of the ball
@@ -33,6 +33,10 @@ where:
 - $\rho$ is the density of air (see below)
 - $C_d$ is the drag coefficient (see below)
 - $C_l$ is the lift coefficient (see below)
+
+Gravity points to the center of the earth.
+Drag points in the opposite direction of the ball's relative velocity vector in the air.
+Lift points perpendicular to the velocity vector and the spin axis.
 
 #### Air density
 
@@ -92,8 +96,6 @@ where:
 - $\omega$ is the angular velocity of the ball (rad/s)
 - $C_l^{spin} \approx 0.39$ is the spin-dependent lift coefficient
 - $n_{spin} \approx 0.37$ is the spin exponent
-
-The lift force is then directed perpendicular to the relative velocity vector in the plane formed by the spin axis and velocity vector (Magnus effect direction).
 
 ## Training
 
