@@ -143,8 +143,9 @@ function calculateAirDensity(atmosphere: Atmosphere): number {
 	const relativeHumidity = Math.min(100, Math.max(0, atmosphere.relativeHumidity))
 	const airPressure = Math.max(10000, atmosphere.airPressure)
 
-	// Tetens formula for saturation vapor pressure over water (Pa)
-	const saturationVaporPressure = 610.94 * Math.exp((17.625 * atmosphere.airTemperatureC) / (atmosphere.airTemperatureC + 243.04))
+	// Alduchov and Eskridge (1996) formula for saturation vapor pressure over water (Pa)
+	// More accurate than standard Tetens formula for typical atmospheric conditions
+	const saturationVaporPressure = 611.2 * Math.exp((17.27 * atmosphere.airTemperatureC) / (atmosphere.airTemperatureC + 237.3))
 	const vaporPressure = (relativeHumidity / 100) * saturationVaporPressure
 	const dryAirPressure = Math.max(0, airPressure - vaporPressure)
 
