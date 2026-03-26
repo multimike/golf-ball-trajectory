@@ -52,6 +52,7 @@ where:
 - $T$ is the absolute temperature (Kelvin)
 
 The vapor pressure is calculated using the Alduchov and Eskridge (1996) formula:
+
 $$P_{vapor} = \frac{RH}{100} \cdot 611.2 \cdot \exp\left(\frac{17.27 \cdot T_C}{T_C + 237.3}\right)$$
 
 where:
